@@ -30,7 +30,23 @@ public:
 		return *c;*/
 		return Complex(_real + b._real, _vir + b._vir);
 	}
-	
+	Complex operator*(Complex& b) {
+		return Complex(_real*b._real - _vir*b._vir, _real*b._vir + _vir*b._real);
+	}
+	Complex operator+(Complex& b) {
+		return Complex(_real + b._real, _vir + b._vir);
+	}
+	Complex operator-(Complex& b) {
+		return Complex(_real - b._real, _vir - b._vir)
+	}
+	void inverse() {
+		T _realTemp = _real;
+		_real = _real / (_real*_real + _vir*_vir);
+		_vir = -(_vir / (_real*_real + _vir*_vir));
+	}
+	T abs() {
+		return _real*_real + _vir*_vir;
+	}
 	template<typename U> friend ostream& operator<<(ostream& os, const Complex<U> a);
 private:
 	T _real;
