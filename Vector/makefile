@@ -7,3 +7,7 @@ $(target):$(obj)
 	
 $(obj):Vector.hpp
 
+.PHONY:clean
+clean:
+	rm -f $(obj) $(target)
+

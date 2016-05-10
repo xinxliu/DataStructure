@@ -6,6 +6,7 @@
 using std::cout;
 using std::cin;
 using std::endl;
+using std::cerr;
 using std::initializer_list;
 
 template<typename T>
@@ -59,7 +60,7 @@ Vector<T>::Vector(initializer_list<value_type> li) {
 	size_ = li.size();
 	capacity_ = 2 * size_;
 	begin_ = new value_type[capacity_];
-	end_ = begin + size_;
+	end_ = begin_ + size_;
 	Ptr temp = begin_;
 	for (auto it = li.begin(); it != li.end(); ++it, ++temp) {
 		*temp = *it;
@@ -120,15 +121,18 @@ Vector<T>& Vector<T>::operator=(Vector<T>& vec) {
 
 template<typename T>
 void Vector<T>::resize(int minSize) {
+	if (capacity_ == 0) {
+		begin_ = new value_type[minSize];
+		end_ = begin_;
+		return;
+	}
 	Ptr tempBegin = begin_;
 	begin_ = new value_type[minSize];
-	for (Ptr temp1 = begin_, temp2 = tempBegin; tempBegin != end_; ++temp2, ++temp1) {
+	for (Ptr temp1 = begin_, temp2 = tempBegin; temp2 != end_; ++temp2, ++temp1) {
 		*(temp1) = *(temp2);
 	}
 	end_ = begin_ + size_;
-	if (capacity_ != 0) {
-		delete[] tempBegin;
-	}
+	delete[] tempBegin;
 	capacity_ = minSize;
 }
 
@@ -141,41 +145,80 @@ void Vector<T>::push_back(T data) {
 		++end_;
 		return;
 	}
-	if (capacity_ <= size_) {
-		resize(2 * size_);
-		*end_ = data;
-		++size;
-		++end_;
+	//to be fixed
+	if (capacity_ <= size_ + 1) {
+		this->resize(2 * capacity_);
 	}
+	*end_ = data;
+	++size_;
+	++end_;
 }
 
 template<typename T>
 void Vector<T>::pop_back() {
 	if (capacity_ == 0) {
-		cout << "nothing to pop_back" << endl;
+		cerr << "nothing to pop_back" << endl;
 		return;
 	}
 	--end_;
+	--size_;
 }
 
 template<typename T>
 void Vector<T>::insert(int pos, value_type data) {
-
+	if (pos<0 || pos>size_) {
+		cerr << "please input valid position" << endl;
+		return;
+	}
+	if (pos == size_) {
+		this->push_back(data);
+		return;
+	}
+	else if (capacity_ <= size_ + 1) {
+		this->resize(2 * capacity_);
+	}
+	++end_;
+	for (int i = size_; i > pos; --i) {
+		begin_[i] = begin_[i - 1];
+	}
+	begin_[pos] = data;
+	++size_;
 }
 
 template<typename T>
-void Vector<T>::erase(int pos)
-{
+void Vector<T>::erase(int pos) {
+	if (pos<0 || pos>size_ - 1) {
+		cerr << "please input valid postion";
+		return;
+	}
+	for (int i = pos; i < size_ - 1; i++) {
+		begin_[i] = begin_[i + 1];
+	}
+	--end_;
+	--size_;
 }
 
 template<typename T>
-void Vector<T>::clear(int first, int end)
-{
+void Vector<T>::clear(int first, int end) {
+	if (first > end || first<0 || end>size_ - 1) {
+		cerr << "please input valid range" << endl;
+		return;
+	}
+	if (first == end) {
+		this->erase(first);
+	}
+	else {
+		int len = end - first + 1;
+		for (int i = end + 1; i < size_; i++) {
+			begin_[i - len] = begin_[i];
+		}
+		size_ -= len;
+		end_ -= len;
+	}
 }
 
 template<typename T>
-void Vector<T>::print()
-{
+void Vector<T>::print() {
 	for (Ptr temp = begin_; temp != end_; ++temp) {
 		cout << *temp << " ";
 	}
